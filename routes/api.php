@@ -22,3 +22,5 @@ Route::post('/register', 'UserController@register');
 Route::post('/profile_update', 'UserController@profile_update');
 Route::post('/profile_view', 'UserController@profile_view');
 Route::post('/categories_api', 'CategoriesController@categories_api');
+Route::post('/brands_api', 'BrandController@brands_api');
+Route::post('/image_upload', 'BrandController@storedata');
