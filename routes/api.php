@@ -24,4 +24,7 @@ Route::post('/profile_update', 'UserController@profile_update');
 Route::post('/profile_view', 'UserController@profile_view');
 Route::post('/categories_api','CategoriesController@Categories_api');
 Route::post('/vendors_api','VendorsController@vendors_api');
+Route::post('/update_api','VendorsController@update_api');
+Route::post('/delete_api','VendorsController@delete_api');
+Route::get('/download_api','VendorsController@download_api');
 Route::post('/image_upload', 'BrandController@storeData');

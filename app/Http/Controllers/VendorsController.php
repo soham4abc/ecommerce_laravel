@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Vendors;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 
 
 class VendorsController extends Controller
@@ -98,6 +99,9 @@ class VendorsController extends Controller
        $country = $request->country;
        $pin = $request->pin;       
        $device_type = $request->device_type;
+       $image = $request->image;
+
+       $path = Storage::disk('s3')->put('vendors/profile_pic', $image);
       
        
        $mobileno = Vendors::where('mobile','=',$mobile)->get();
@@ -125,14 +129,106 @@ class VendorsController extends Controller
        $createcuster->country = $country;
        $createcuster->pin = $pin;
        $createcuster->device_type = $device_type;
+       $createcuster->profile_pic = $path;
        $createcuster->token = $token;
        $createcuster->save();
 
 
        return response()->json([
            'message'=>'Success',
-           'token'=>$token           
+           'token'=>$token,
+           'path'=>$path          
            ]);
 
     }
+
+
+    public function download_api(Request $request)
+    {
+        $file = Storage::disk('s3')->get('vendors/profile_pic/' . 'mGfSrwKbxAXSyveRgEtUBsF5mIcpYf8ME1giDbEb.jpeg' );
+        //return Response::download($file ,'s3://ecomimagesas/vendors/profile_pic/mGfSrwKbxAXSyveRgEtUBsF5mIcpYf8ME1giDbEb.jpeg');
+        //print_r("download works!");
+
+    }
+
+    public function update_api(Request $request)
+    {
+
+    
+    $address = $request->address;
+    $town = $request->town;
+    $state = $request->state;
+    $country = $request->country;
+    $pin = $request->pin;    
+    $uemail=$request->uemail;
+    $vtoken=$request->vtoken;
+
+    $uemail=DB::table('users')-> where([
+        ['email', '=', $uemail],
+        
+    ])->get();
+
+    $vendor_data=DB::table('vendors')-> where([
+        ['token', '=', $vtoken],
+        
+    ])->get();
+
+    if(count($uemail) == 0){
+        return response('{"message":"Invalid token!"}');
+    }
+
+    if(count($vendor_data)>0){
+
+    $vendor = vendors::find($vendor_data[0]->id);    
+    $vendor->address = $address;
+    $vendor->town = $town;
+    $vendor->state = $state;
+    $vendor->country = $country;
+    $vendor->pin = $pin;
+    
+    
+    $vendor->save();
+    }
+
+    
+        return response()->json(['message'=>'Success']);
+    
+        
+
+    }
+
+    public function delete_api(Request $request)
+    {
+
+    
+    
+    $uemail=$request->uemail;
+    $vtoken=$request->vtoken;
+
+    $uemail=DB::table('users')-> where([
+        ['email', '=', $uemail],
+        
+    ])->get();
+
+    $vendor_data=DB::table('vendors')-> where([
+        ['token', '=', $vtoken],
+        
+    ])->get();
+
+    if(count($uemail) == 0){
+        return response('{"message":"Invalid token!"}');
+    }
+
+    if(count($vendor_data)>0){
+
+        $vendor = vendors::find($vendor_data[0]->id);       
+        $vendor->delete();
+    }    
+        return response()->json(['message'=>'Success']);
+    
+        
+
+    }
+
+
 }
