@@ -26,5 +26,8 @@ Route::post('/categories_api','CategoriesController@Categories_api');
 Route::post('/vendors_api','VendorsController@vendors_api');
 Route::post('/update_api','VendorsController@update_api');
 Route::post('/delete_api','VendorsController@delete_api');
+Route::post('/customers_api','CustomerController@customers_api');
+Route::post('/customers_update','CustomerController@customer_update');
+Route::post('/customers_view','CustomerController@customer_view');
 Route::get('/download_api','VendorsController@download_api');
 Route::post('/image_upload', 'BrandController@storeData');

@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\users;
-use Illuminate\Support\Str;
 
-class UserController extends Controller
+use Illuminate\Http\Request;
+use App\Customer;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
+//use Illuminate\Support\Facades\DB;
+
+class CustomerController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -81,22 +84,33 @@ class UserController extends Controller
      */
     public function destroy($id)
     {
-        
+        //
     }
-    public function register(Request $request)
+
+    public function customers_api(Request $request)
     {
        $name = $request->name;
        $mobile = $request->mobile;
        $email = $request->email;
        $password = $request->password;
+       $address = $request->address;
+       $town = $request->town;
+       $state = $request->state;
+       $country = $request->country;
+       $pin = $request->pin;       
+       $device_type = $request->device_type;
+       $image = $request->image;
+
+       $path = Storage::disk('s3')->put('Customer/profile_pic', $image);
+      
        
-       $mobileno = users::where('mobile','=',$mobile)->get();
+       $mobileno = Customer::where('mobile','=',$mobile)->get();
       
        if(sizeof($mobileno)>0){
         return response('{"message":"Mobile no. already exists"}');
        }
        
-       $emailid=users::where('mobile','=',$email)->get();
+       $emailid=Customer::where('mobile','=',$email)->get();
 
        if(sizeof($emailid)>0){
            return response('{"message":"Mobile no. already exists"}');
@@ -104,47 +118,31 @@ class UserController extends Controller
 
        $token = Str::random(16);
 
-       $createcuster = new users;
+       $createcuster = new Customer;
        $createcuster->name = $name;
        $createcuster->mobile = $mobile;
        $createcuster->email = $email;
        $createcuster->password = $password;
+       $createcuster->address = $address;
+       $createcuster->town = $town;
+       $createcuster->state = $state;
+       $createcuster->country = $country;
+       $createcuster->pin = $pin;
+       $createcuster->device_type = $device_type;
+       $createcuster->profile_pic = $path;
        $createcuster->token = $token;
        $createcuster->save();
 
+
        return response()->json([
            'message'=>'Success',
-           'token'=>$token           
+           'token'=>$token,
+           'path'=>$path          
            ]);
 
     }
-        
-  public function login(Request $request)
-  {
-     $email = $request->email;
-     $password = $request->password;
 
-     $token = str::random(16);
-
-     $emailid = users::where([
-         ['email','=',$email],
-         ['password','=',$password]
-     ])->get();
-
-     if(count($emailid) == 0){
-        return response('{"message":"Incorrect Username/Password"}');
-    }
-
-    $user = users::find($emailid[0]->id);
-    $user->token = $token;
-    $user->save();
-
-    if(sizeof($emailid)==1){
-        return response()->json(['message'=>'Success', 'token'=>$token]);
-    }
-
-  }
-  public function profile_update(Request $request)
+    public function customer_update(Request $request)
   {
     $address = $request->address;
     $town = $request->town;
@@ -155,7 +153,7 @@ class UserController extends Controller
     $device_type = $request->device_type;
     $token=$request->token;
 
-    $emailid=users::where([
+    $emailid=Customer::where([
         ['token', '=', $token],
         
     ])->get();
@@ -164,7 +162,7 @@ class UserController extends Controller
         return response('{"message":"Invalid token!"}');
     }
 
-    $user = users::find($emailid[0]->id);
+    $user = Customer::find($emailid[0]->id);
     $user->token = $token;
     $user->address = $address;
     $user->town = $town;
@@ -179,14 +177,13 @@ class UserController extends Controller
     if(sizeof($emailid)==1){
         return response()->json(['message'=>'Success', 'token'=>$token]);
     }
-
   }
 
-  public function profile_view(Request $request)
+  public function customer_view(Request $request)
   {
     $token=$request->token;
 
-    $profile_det=users::where([
+    $profile_det=Customer::where([
         ['token', '=', $token],
         
     ])->get();
@@ -201,3 +198,4 @@ class UserController extends Controller
     
   }
 }
+
